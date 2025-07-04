@@ -5,7 +5,7 @@ const env = require("dotenv").config();
 const contactRoutes = require("./src/routes/contact");
 const db = require("./src/data/db");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // Initialize database connection
 db.intializeDb((err) => {
@@ -26,6 +26,4 @@ app.use(cors());
 app.use("/api/contact", contactRoutes);
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => {});
