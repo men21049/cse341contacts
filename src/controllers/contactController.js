@@ -80,12 +80,12 @@ const updateContact = async (req, res) => {
   const database = await mongodb.getDb();
   const response = await database
     .collection("contacts")
-    .replace((_id = contact.id), contact);
+    .replaceOne((_id = contact.id), contact);
 
   if (!response.acknowledged) {
     return res.status(500).json({ message: "Error creating contact" });
   } else {
-    res.status(201).json({ message: "Contact created", data: contact });
+    res.status(201).json({ message: "Contact Updated", data: contact });
   }
 };
 
