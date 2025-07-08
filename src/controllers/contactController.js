@@ -2,6 +2,7 @@ const mongodb = require("../data/db");
 const ObjectId = require("mongodb").ObjectId;
 
 const getContact = async (req, res) => {
+  //#swagger.tag=['Contacts']
   try {
     const database = await mongodb.getDb();
     const contacts = await database
@@ -23,6 +24,7 @@ const getContact = async (req, res) => {
 };
 
 const getContactById = async (req, res) => {
+  //#swagger.tag=['Contacts']
   const id = new ObjectId(req.params.id);
   try {
     const database = await mongodb.getDb();
@@ -44,23 +46,63 @@ const getContactById = async (req, res) => {
   }
 };
 
-const createContact = (req, res) => {
-  const newContact = req.body;
-  res.status(201).json({ message: "Contact created", data: newContact });
+const createContact = async (req, res) => {
+  //#swagger.tag=['Contacts']
+  const contact = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    birthday: req.body.birthday,
+    email: req.body.email,
+    favoriteColor: req.body.favoriteColor,
+  };
+
+  const database = await mongodb.getDb();
+  const response = await database.collection("contacts").insertOne(contact);
+
+  if (!response.acknowledged) {
+    return res.status(500).json({ message: "Error creating contact" });
+  } else {
+    res.status(201).json({ message: "Contact created", data: contact });
+  }
 };
 
-const updateContact = (req, res) => {
-  const id = req.params.id;
-  const updatedContact = req.body;
-  res.status(200).json({
-    message: `Contact with ID: ${id} updated`,
-    data: updatedContact,
-  });
+const updateContact = async (req, res) => {
+  //#swagger.tag=['Contacts']
+  const contact = {
+    id: new ObjectId(req.params.id),
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    birthday: req.body.birthday,
+    email: req.body.email,
+    favoriteColor: req.body.favoriteColor,
+  };
+
+  const database = await mongodb.getDb();
+  const response = await database
+    .collection("contacts")
+    .replace((_id = contact.id), contact);
+
+  if (!response.acknowledged) {
+    return res.status(500).json({ message: "Error creating contact" });
+  } else {
+    res.status(201).json({ message: "Contact created", data: contact });
+  }
 };
 
-const deleteContact = (req, res) => {
-  const id = req.params.id;
-  res.status(200).json({ message: `Contact with ID: ${id} deleted` });
+const deleteContact = async (req, res) => {
+  //#swagger.tag=['Contacts']
+  const id = new ObjectId(req.params.id);
+
+  const database = await mongodb.getDb();
+  const response = await database
+    .collection("contacts")
+    .remove((_id = id), true);
+
+  if (!response.acknowledged) {
+    return res.status(500).json({ message: "Error creating contact" });
+  } else {
+    res.status(201).json({ message: "Contact created", data: contact });
+  }
 };
 
 module.exports = {
