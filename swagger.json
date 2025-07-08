@@ -5,7 +5,7 @@
     "title": "CSE341 Contacts API",
     "description": ""
   },
-  "host": "https://cse341-ww-student-code-1-sdyk.onrender.com",
+  "host": "cse341-ww-student-code-1-sdyk.onrender.com",
   "basePath": "/",
   "schemes": [
     "https"
