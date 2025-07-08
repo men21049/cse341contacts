@@ -5,10 +5,10 @@
     "title": "CSE341 Contacts API",
     "description": ""
   },
-  "host": "localhost:3000",
+  "host": "cse341-ww-student-code-1-sdyk.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
     "/": {
