@@ -36,6 +36,9 @@ const getContactById = async (req, res) => {
         console.log("Contacts retrieved:", data.length);
         res.setHeader("Content-Type", "application/json");
         res.status(200).json(data);
+      })
+      .catch((error) => {
+        res.status(404).json({ message: "Contact not found" });
       });
     return contacts;
   } catch (error) {
@@ -55,21 +58,25 @@ const createContact = async (req, res) => {
     email: req.body.email,
     favoriteColor: req.body.favoriteColor,
   };
+  try {
+    const database = await mongodb.getDb();
+    const response = await database.collection("contacts").insertOne(contact);
 
-  const database = await mongodb.getDb();
-  const response = await database.collection("contacts").insertOne(contact);
-
-  if (!response.acknowledged) {
-    return res.status(500).json({ message: "Error creating contact" });
-  } else {
-    res.status(201).json({ message: "Contact created", data: contact });
+    if (response.acknowledged) {
+      res.status(204).json({ message: "Contact created", data: contact });
+    }
+  } catch (error) {
+    console.error("Error in createContact:", error);
+    return res
+      .status(500)
+      .json({ message: "Error creating contact", error: error.message });
   }
 };
 
 const updateContact = async (req, res) => {
   //#swagger.tag=['Contacts']
+  const id = new ObjectId(req.params.id);
   const contact = {
-    id: new ObjectId(req.params.id),
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     birthday: req.body.birthday,
@@ -77,15 +84,22 @@ const updateContact = async (req, res) => {
     favoriteColor: req.body.favoriteColor,
   };
 
-  const database = await mongodb.getDb();
-  const response = await database
-    .collection("contacts")
-    .replaceOne((_id = contact.id), contact);
+  try {
+    const database = await mongodb.getDb();
+    const response = await database
+      .collection("contacts")
+      .replaceOne({ _id: id }, contact);
 
-  if (!response.acknowledged) {
-    return res.status(500).json({ message: "Error creating contact" });
-  } else {
-    res.status(201).json({ message: "Contact Updated", data: contact });
+    if (response.modifiedCount > 0) {
+      res.status(204).send();
+    } else {
+      res.status(404).json({ message: "Contact not found" });
+    }
+  } catch (error) {
+    console.error("Error in updateContact:", error);
+    return res
+      .status(500)
+      .json({ message: "Error updating contact", error: error.message });
   }
 };
 
@@ -93,15 +107,21 @@ const deleteContact = async (req, res) => {
   //#swagger.tag=['Contacts']
   const id = new ObjectId(req.params.id);
 
-  const database = await mongodb.getDb();
-  const response = await database
-    .collection("contacts")
-    .remove((_id = id), true);
+  try {
+    const database = await mongodb.getDb();
+    const response = await database
+      .collection("contacts")
+      .deleteOne({ _id: id }, true);
 
-  if (!response.acknowledged) {
-    return res.status(500).json({ message: "Error creating contact" });
-  } else {
-    res.status(201).json({ message: "Contact created", data: contact });
+    if (response.deletedCount > 0) {
+      return res.status(204).send();
+    }
+    return res.status(404).json({ message: "Contact not found" });
+  } catch (error) {
+    console.error("Error in deleteContact:", error);
+    return res
+      .status(500)
+      .json({ message: "Error deleting contact", error: error.message });
   }
 };
 
